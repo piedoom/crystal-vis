@@ -1,5 +1,4 @@
 "use strict";
-(function(){
 var app;
 var audio;
 var canvas;
@@ -19,9 +18,8 @@ app = {
     init: function(){
         canvas.init();
         audio.init();
-
         // set up some handlers
-        document.querySelector("#playButton").onclick = audio.uiToggle;
+        document.querySelector("#playButton").onclick = audio.toggle;
     }
 };
 
@@ -53,7 +51,7 @@ waveStates = {
 canvas = {
     element: document.querySelector("#canvas"),
     ctx: null,
-    canvasState: canvasStates.PAUSE,
+    canvasState: canvasStates.PLAY,
     init: function(){
         this.ctx = this.element.getContext("2d"),
         this.ctx.save();
@@ -92,15 +90,14 @@ canvas = {
 // set up a state
 playStates = {
     PLAYING: 1,
-    PAUSED: 2,
-    STOPPED: 3
+    PAUSED: 2
 };
 
 audio = {
     // set some constants
     DEFAULT_SONG: "/media/song1.mp3",
     element: document.createElement("audio"),
-    playState: 3,
+    playState: playStates.PAUSED,
     NUM_SAMPLES: 512,
 
     // properties
@@ -114,31 +111,42 @@ audio = {
         this.changeSong(this.DEFAULT_SONG);
         // set some default properties
         this.element.loop = true;
+        this.element.oncanplay = this.createWebAudioContextWithAnalyzerNode(this.element);
     },
 
     changeState: function(newState){
-        this.playState = newState;
+        if (this.playState != newState){
+            this.playState = newState;
+        }
     },
 
     // methods
     play: function(){
         this.element.play();
         this.changeState(playStates.PLAYING); 
-        canvas.changeState(canvasStates.PLAY);
-        console.log("Playing song")
+        //canvas.changeState(canvasStates.PLAY);
+        console.log("Playing song");  
     },
     stop: function(){
         this.element.pause();
         this.element.currentTime = 0;
-        this.changeState(playStates.STOPPED); 
-        canvas.changeState(canvasStates.PAUSE);
+        this.changeState(playStates.PAUSED); 
+        //canvas.changeState(canvasStates.PAUSE);
         console.log("Stopping song")
     },
     pause: function(){
         this.element.pause();
         this.changeState(playStates.PAUSED); 
-        canvas.changeState(canvasStates.PAUSE);
-        console.log("Pausing song")
+        //canvas.changeState(canvasStates.PAUSE);
+        console.log("Pausing song");
+    },
+    uiToggle: function(){
+        var button = document.getElementById("playButton");
+        if (audio.playState == playStates.PAUSED){
+            button.innerHTML = "play"
+        }else{
+            button.innerHTML = "pause"
+        }
     },
     toggle: function(){
         if (audio.playState != playStates.PLAYING){
@@ -146,26 +154,20 @@ audio = {
         }else{
             audio.pause();
         }
-        return (audio.playState != playStates.PLAYING);
+        audio.uiToggle();
     },
-    uiToggle: function(e){
-        if (audio.toggle()){
-            e.target.innerHTML = "play"
-        }else{
-            e.target.innerHTML = "pause"
-        }
-
-    },
+    
 
     // change our current song
     changeSong: function(uri){
         if (typeof uri === "string"){
-            // stop the currently playing song
-            this.stop();
             // load our new song
             this.element.src = uri;
             console.log("Changed song to " + uri)
-            this.element.oncanplay = this.createWebAudioContextWithAnalyzerNode(this.element);
+            if (this.playState == playStates.PLAYING){
+                this.element.oncanplay = audio.play();
+            }
+            //audio.uiToggle();
         }
     },
 
@@ -225,4 +227,3 @@ function init(){
 }
 
 window.onload = init;
-})();
