@@ -2,10 +2,16 @@ var canvasEl = document.getElementById("canvas");
 var uiEl = document.getElementById("sidebar");
 var searchbar = document.getElementById("search");
 var results = document.getElementById("results")
+var ghostingBar = document.getElementById("ghosting");
 var ajax = {};
 
 function populate(json){
     
+}
+
+ghostingBar.onchange = function(e){
+    canvas.ghosting = e.target.value;
+    console.log(e.target.value);
 }
 
 searchbar.onkeyup = function(e){
@@ -22,7 +28,7 @@ searchbar.onkeyup = function(e){
 
 // build a UI element from json
 function buildResult(obj){
-    return "<div onclick='changesong(this)' data-url=" + obj["Mp3Url"] + " \
+    return "<div onclick='changesong(this)' class='result-item' data-url=" + obj["Mp3Url"] + " \
     >" + obj["Title"] + "</div>";
 }
 

@@ -48,13 +48,64 @@ waveStates = {
     WAVEFORM: 2
 }
 
+// a bunch of visualization objects for different effects
+// must have a name, init, frame, draw, and last.
+// init: stuff to do at the beginning of the lifetime of the effect. called once (or when changed to)
+// frame: stuff to draw at the beginning of each frame (e.g. - beginPath())
+// draw: stuff to draw for each datapoint
+// last: stuff to do at the end of the frame
+var vis = [
+    {
+        name: "bars",
+        init: function(ctx){
+            
+        },
+        frame: function(ctx){
+            
+        },
+        draw: function(i, data, time, ctx){
+            ctx.fillRect(ui.spacingWidth(data.length) * i, 0, 4, canvasEl.height / 255 * data[i] + 4)
+        },
+        last: function(ctx){}
+    },
+    {
+        name: "lines",
+        particles: [],
+        init: function(ctx){
+            
+        },
+        frame: function(ctx){
+            ctx.beginPath();
+        },
+        draw: function(i, data, time, ctx){
+            
+
+            // main audio stuff
+            ctx.lineTo(ui.spacingWidth(data.length) * i, canvasEl.height / 2 + (data[i] * (canvasEl.height /512))); 
+            ctx.lineTo(ui.spacingWidth(data.length) * i, canvasEl.height / 2 - (data[i] * (canvasEl.height /512))); 
+        },
+        last: function(ctx){
+            ctx.stroke();
+        }
+    },
+]
+
 canvas = {
     element: document.querySelector("#canvas"),
     ctx: null,
+    effect: 1,
+    ghosting: 0.0,
     canvasState: canvasStates.PLAY,
     init: function(){
         this.ctx = this.element.getContext("2d"),
         this.ctx.save();
+
+        this.ctx.fillStyle = "#6ec90e";
+        this.ctx.strokeStyle = "#6ec90e";
+        this.ctx.save();
+
+        vis[this.effect].init(this.ctx);
+
         requestAnimationFrame(this.drawFrame.bind(this));
     },
     changeState: function(newState){
@@ -64,25 +115,35 @@ canvas = {
     },
     // MAIN DRAWING LOOP
     drawFrame: function(timestamp){
+        // if currently paused, dont draw
         if (this.canvasState == canvasStates.PAUSE){
             return;
         }
 
+        // reset to a blank canvas
         this.clearFrame();
 
+        // get audio data for this frame
         var data = audio.getFrequencyData();
+
+        // set up the frame for the current effect
+        vis[this.effect].frame(this.ctx);
+
+        // draw
         for (var i = 0; i < data.length; i++){
-            this.ctx.fillStyle = "#6ec90e";
-            this.ctx.fillRect(ui.spacingWidth(data.length) * i, 0, 4, canvasEl.height / 255 * data[i] + 4)
+            vis[this.effect].draw(i, data, timestamp, this.ctx);
         }
+
+        // finish up the frame
+        vis[this.effect].last(this.ctx);
         requestAnimationFrame(this.drawFrame.bind(this));
     },
 
     clearFrame: function(){
-        this.ctx.restore();
-        this.ctx.fillStyle = "black";
+        this.ctx.save();
+        this.ctx.fillStyle = "rgba(0,0,0," + (1 - this.ghosting) + ")";
         this.ctx.fillRect(0,0,this.element.width,this.element.height);
-        this.ctx.fill();
+        this.ctx.restore();
     }
 };
 

@@ -8,9 +8,12 @@
 <body>
     <canvas id="canvas" width="100" height="100"></canvas>
     <div id="sidebar">
-        <div id="playButton" class="button large">play</div>
-        <input type="text" id="search"/>
-        <div id="results"></div>
+        <div id="playButton" class="button large section">play</div>
+        <div id="searchBox" class="section">
+            <input type="text" placeholder="search" id="search"/>
+            <div id="results"></div>
+        </div>
+        <input type="range" min="0" max="1" id="ghosting" value="0" step="0.05"/> 
     </div>
     <script src="/js/main.js"></script>
     <script src="/js/ui.js"></script>
