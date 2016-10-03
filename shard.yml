@@ -1,0 +1,12 @@
+name: vis
+version: 0.1.0
+
+authors:
+  - doomy
+
+license: MIT
+
+dependencies:
+  kemal:
+    github: sdogruyol/kemal
+    branch: master
