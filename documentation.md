@@ -27,7 +27,7 @@ All requirements are accounted for!
 
 4. Web Audio API
 
-Okay, kind of dropped the ball on the other analyzer node :(.  Got a little too invested in the extra stuff, and now it's 4AM.  Oops.
+Uses analyzer and gain nodes.
 
 6. Code
 
