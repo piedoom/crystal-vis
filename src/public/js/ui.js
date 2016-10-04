@@ -7,7 +7,8 @@ var hslStroke = document.getElementById("strokeHue");
 var hslFill = document.getElementById("fillHue");
 var visualizerSelect = document.getElementById("visSelect");
 var filSelect = document.getElementById("filSelect");
-var dataSelect = document.getElementById("dataSelect")
+var dataSelect = document.getElementById("dataSelect");
+var volumeSlider = document.getElementById("volume");
 
 var ajax = {};
 
@@ -45,8 +46,13 @@ filSelect.onchange = function(e){
 }
 
 dataSelect.onchange = function(e){
-    console.log(e.target.value);
+    // console.log(e.target.value);
     canvas.dataSource = e.target.value;
+}
+
+// change volume
+volumeSlider.oninput = function(e){
+    audio.gainNode.gain.value = e.target.value;
 }
 
 // change stuff for the hslStroke bar
@@ -74,7 +80,7 @@ function hslFromDegrees(degrees){
 // change the amount of ghosting occuring with the visualizer
 ghostingBar.oninput = function(e){
     canvas.ghosting = e.target.value;
-    console.log(e.target.value);
+    // console.log(e.target.value);
 }
 
 // perform a search with the clyp api

@@ -207,7 +207,7 @@ canvas = {
         this.ctx.fillStyle = color;
     },
     changeState: function(newState){
-        console.log(this.canvasState);
+        // console.log(this.canvasState);
         this.canvasState = (newState);
         requestAnimationFrame(this.drawFrame.bind(this));
     },
@@ -275,6 +275,7 @@ audio = {
 
     // properties
     analyzerNode: null,
+    gainNode: null,
     audioCtx: null,
     sourceNode: null,
 
@@ -299,20 +300,20 @@ audio = {
         this.element.play();
         this.changeState(playStates.PLAYING); 
         //canvas.changeState(canvasStates.PLAY);
-        console.log("Playing song");  
+        // console.log("Playing song");  
     },
     stop: function(){
         this.element.pause();
         this.element.currentTime = 0;
         this.changeState(playStates.PAUSED); 
         //canvas.changeState(canvasStates.PAUSE);
-        console.log("Stopping song")
+        // console.log("Stopping song")
     },
     pause: function(){
         this.element.pause();
         this.changeState(playStates.PAUSED); 
         //canvas.changeState(canvasStates.PAUSE);
-        console.log("Pausing song");
+        // console.log("Pausing song");
     },
     uiToggle: function(){
         var button = document.getElementById("playButton");
@@ -337,7 +338,7 @@ audio = {
         if (typeof uri === "string"){
             // load our new song
             this.element.src = uri;
-            console.log("Changed song to " + uri)
+            // console.log("Changed song to " + uri)
             if (this.playState == playStates.PLAYING){
                 this.element.oncanplay = audio.play();
             }
@@ -347,7 +348,7 @@ audio = {
 
     // create analyzer stuff
     createWebAudioContextWithAnalyzerNode: function (audioElement) {
-        console.log("audio ready");
+        // console.log("audio ready");
         // create new AudioContext
         // The || is because WebAudio has not been standardized across browsers yet
         // http://webaudio.github.io/web-audio-api/#the-audiocontext-interface
@@ -355,16 +356,21 @@ audio = {
         
         // create an analyser node
         this.analyzerNode = this.audioCtx.createAnalyser();
-        
+
+        this.gainNode = this.audioCtx.createGain();
+
         // fft stands for Fast Fourier Transform
         this.analyzerNode.fftSize = this.NUM_SAMPLES;
         
         // this is where we hook up the <audio> element to the analyzerNode
         this.sourceNode = this.audioCtx.createMediaElementSource(audioElement); 
         this.sourceNode.connect(this.analyzerNode);
+        this.sourceNode.connect(this.gainNode);
+        this.gainNode.gain.value = 0;
         
         // here we connect to the destination i.e. speakers
         this.analyzerNode.connect(this.audioCtx.destination);
+        this.gainNode.connect(this.audioCtx.destination);
         return this.analyzerNode;
     },
 
