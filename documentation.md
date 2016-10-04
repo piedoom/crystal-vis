@@ -111,6 +111,31 @@ Set up this way, I can easily write new visualizers without touching any HTML.
 `audio`: This object contains audio data as well as basic functions like `play`.  It uses an enum to determin it's state, and changes
 UI accordingly.  It also hooks up the analyzer node to analyze the song.
 
+What went right (and wrong)
+======
 
+After making 99% of the application, I realized how I could better structure
+objects to make things more maintainable.  Right now, there's some
+overlap between UI and Audio processing.  I think each object should
+have only one purpose, and each module should have one goal.  
 
+The API thing worked great!  Using Kemal was an adventure since it
+has like 0 documentation, but I managed to make it work.  That was fun.
 
+Given more energy, I would write some more impressive visualizations.
+Right now they're a little lacklustre.  I would probably have a background
+canvas layer so two visualizations could be played at once.
+
+Resources
+======
+
+I'm using the clyp.it API to fetch songs.  The intial song is a local file,
+and I made that one.  I used MDN for documentation.
+
+Grade Myself
+======
+
+Grading myself based on effort and time, I would give myself 100%.  
+Based on the ruberic, I notice I forgot gradients, so I would give myself
+a 93% :).  But also I totally went above and beyond by making my own server 
+and using git, so... 170%.
