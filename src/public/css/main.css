@@ -21,6 +21,7 @@ body {
     padding: 12px;
     box-sizing: border-box;
     background: #161616;
+    overflow-y: scroll;
 }
 
 .button{
@@ -96,4 +97,78 @@ body {
     color: white;
     border-top-right-radius: 3px;
     border-top-left-radius: 3px;
+}
+
+label{
+    color: white;
+    display: block;
+    margin-bottom: 12px;
+}
+
+select{
+    width: 100%;
+    padding: 8px;
+    background: #2f3030;
+    color: #6ec90e;
+    border-style: solid;
+    border-color: #2f3030;
+}
+
+option{
+    border: none;
+}
+
+/* reset range styles */
+/* https://www.impressivewebs.com/onchange-vs-oninput-for-range-sliders/ */
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 100%; /* Specific width is required for Firefox. */
+  background: #2f3030; /* Otherwise white in Chrome */
+  height: 7px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+
+input[type=range]:focus {
+  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+}
+
+/* Special styling for WebKit/Blink */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 36px;
+  width: 16px;
+  background: #6ec90e;
+  cursor: pointer;
+  border: none;
+  border-radius: 0;
+  margin-top: -14px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+}
+
+/* All the same stuff for Firefox */
+input[type=range]::-moz-range-thumb {
+  height: 36px;
+  width: 16px;
+  border: none;
+  border-radius: 0;
+  background: #6ec90e;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 0;
+  position: relative;
+  top: 6px;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+  width: 0;
+}
+
+input[type=range]::-moz-range-track {
+  width: 0;
 }

@@ -8,6 +8,10 @@ var canvasStates;
 var ui;
 var helper;
 var waveStates;
+var filters;
+
+// I know there arent supposed to be globals except it kept breaking stuff :(
+// I learned a ton doing this so if I were to redo this it would be lots cleaner
 
 app = {
     // set some object properties
@@ -48,6 +52,10 @@ waveStates = {
     WAVEFORM: 2
 }
 
+var defaults = {
+    COLOR: "#6ec90e"
+}
+
 // a bunch of visualization objects for different effects
 // must have a name, init, frame, draw, and last.
 // init: stuff to do at the beginning of the lifetime of the effect. called once (or when changed to)
@@ -57,9 +65,6 @@ waveStates = {
 var vis = [
     {
         name: "bars",
-        init: function(ctx){
-            
-        },
         frame: function(ctx){
             
         },
@@ -70,10 +75,6 @@ var vis = [
     },
     {
         name: "lines",
-        particles: [],
-        init: function(ctx){
-            
-        },
         frame: function(ctx){
             ctx.beginPath();
         },
@@ -88,25 +89,122 @@ var vis = [
             ctx.stroke();
         }
     },
+    {
+        name: "leaves",
+        frame: function(ctx){
+            ctx.moveTo(0,canvasEl.height / 2);
+            ctx.beginPath();
+        },
+        draw: function(i, data, time, ctx){
+            if (i % 15 === 0 || i === 0){
+                var baseX = ui.spacingWidth(data.length) * i;
+                var baseY = canvasEl.height / 2 + (data[i] * (canvasEl.height /512));
+                var p = (Math.sin(time / 1000) * 100);
+                for (var n = 0; n < 10; n++){
+                    ctx.bezierCurveTo(baseX - 10 + (n * 20) + p,baseY / n - p,baseX - 20,baseY - 20,baseX,baseY + (n * (p / 10)));
+                }
+            }
+        },
+        last: function(ctx){
+            ctx.stroke();
+        }
+    },
+    {
+        name: "sailboats",
+        frame: function(ctx){
+            ctx.moveTo(0,canvasEl.height / 2);
+            ctx.beginPath();
+        },
+        draw: function(i, data, time, ctx){
+            if (i % 15 === 0 || i === 0){
+                var baseX = ui.spacingWidth(data.length) * i;
+                var baseY = canvasEl.height / 2 + (data[i] * (canvasEl.height /512));
+                var p = (Math.sin(time / 1000) * 100);
+                for (var n = 0; n < 10; n++){
+                    ctx.arc(baseX, baseY, Math.abs(10 + p) + 10, 0, Math.abs(Math.PI - (p / 100) - ((time * i)/1000000)), false);
+                }
+            }
+        },
+        last: function(ctx){
+            ctx.stroke();
+        }
+    },
+    {
+        name: "matrix",
+        frame: function(ctx){
+            ctx.beginPath();
+        },
+        draw: function(i, data, time, ctx){
+            if (i % 3 === 0 || i === 0){
+                var baseX = ui.spacingWidth(data.length) * i;
+                var baseY =  (data[i] * (canvasEl.height /512));
+                var p = (Math.sin(time / 1000) * 100);
+                for (var n = 0; n < 10; n++){
+                    ctx.fillRect(baseX,baseY + (n * 40),10,10)    
+                }
+            }
+        },
+        last: function(ctx){
+            ctx.stroke();
+        }
+    },
+]
+
+filters = [
+    {
+        name: "none",
+        filter: function(){}
+    },
+    {
+        name: "invert",
+        filter: function(imageData, audioData, time, ctx){
+            var data = imageData.data;
+            for (var i = 0; i < data.length; i += 4) {
+                data[i]     = 255 - data[i];     // red
+                data[i + 1] = 255 - data[i + 1]; // green
+                data[i + 2] = 255 - data[i + 2]; // blue
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+    },
+    {
+        name: "grayscale",
+        filter: function(imageData, audioData, time, ctx){
+            var data = imageData.data;
+            for (var i = 0; i < data.length; i += 4) {
+                var val = 255 - data[i]
+                data[i]     = val;     // red
+                data[i + 1] = val;
+                data[i + 2] = val;
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+    }
 ]
 
 canvas = {
     element: document.querySelector("#canvas"),
     ctx: null,
-    effect: 1,
+    effect: 0,
+    dataSource: 0,
+    filter: 0,
     ghosting: 0.0,
     canvasState: canvasStates.PLAY,
     init: function(){
         this.ctx = this.element.getContext("2d"),
         this.ctx.save();
 
-        this.ctx.fillStyle = "#6ec90e";
-        this.ctx.strokeStyle = "#6ec90e";
+        this.ctx.fillStyle = defaults.COLOR;
+        this.ctx.strokeStyle = defaults.COLOR;
         this.ctx.save();
 
-        vis[this.effect].init(this.ctx);
-
         requestAnimationFrame(this.drawFrame.bind(this));
+    },
+    changeStrokeColor: function(color){
+        this.ctx.strokeStyle = color;
+    },
+    changeFillColor: function(color){
+        this.ctx.fillStyle = color;
     },
     changeState: function(newState){
         console.log(this.canvasState);
@@ -124,7 +222,11 @@ canvas = {
         this.clearFrame();
 
         // get audio data for this frame
-        var data = audio.getFrequencyData();
+        if (this.dataSource == 0){
+            var data = audio.getFrequencyData();
+        }else{
+            var data = audio.getWaveformData();
+        }
 
         // set up the frame for the current effect
         vis[this.effect].frame(this.ctx);
@@ -136,6 +238,16 @@ canvas = {
 
         // finish up the frame
         vis[this.effect].last(this.ctx);
+
+        // BEGIN EFFECTS
+        if (this.filter != 0){
+        filters[this.filter].filter(
+            this.ctx.getImageData(0,0,this.element.width,this.element.height),
+            this.data,
+            timestamp,
+            this.ctx);
+        }
+
         requestAnimationFrame(this.drawFrame.bind(this));
     },
 
@@ -168,6 +280,7 @@ audio = {
 
     // initialize
     init: function(){
+        this.element.crossOrigin = "anonymous";
         // set our audio to the default track
         this.changeSong(this.DEFAULT_SONG);
         // set some default properties

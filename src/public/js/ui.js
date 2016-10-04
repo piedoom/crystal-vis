@@ -3,17 +3,81 @@ var uiEl = document.getElementById("sidebar");
 var searchbar = document.getElementById("search");
 var results = document.getElementById("results")
 var ghostingBar = document.getElementById("ghosting");
+var hslStroke = document.getElementById("strokeHue");
+var hslFill = document.getElementById("fillHue");
+var visualizerSelect = document.getElementById("visSelect");
+var filSelect = document.getElementById("filSelect");
+var dataSelect = document.getElementById("dataSelect")
+
 var ajax = {};
 
-function populate(json){
+function init(){
+    // populate the selection    
+    for (var i = 0; i <vis.length; i++){
+        item = vis[i];
+        var opt = createOption(i, item.name)
+        visualizerSelect.appendChild(opt);
+    }
+
+    for (var i = 0; i < filters.length; i++){
+        item = filters[i];
+        var opt = createOption(i, item.name)
+        filSelect.appendChild(opt);
+    }
+
     
 }
 
-ghostingBar.onchange = function(e){
+function createOption(val, name){
+    opt = document.createElement('option');
+    opt.value = val;
+    opt.innerHTML = name;
+    return opt;
+}
+
+// change the current visualizer
+visSelect.onchange = function(e){
+    canvas.effect = e.target.value;
+}
+
+filSelect.onchange = function(e){
+    canvas.filter = e.target.value;
+}
+
+dataSelect.onchange = function(e){
+    console.log(e.target.value);
+    canvas.dataSource = e.target.value;
+}
+
+// change stuff for the hslStroke bar
+hslStroke.oninput = function(e){
+    color = hslFromDegrees(e.target.value)
+    // change slider thumb background color
+    e.target.style.backgroundColor = color;
+    // change canvas color
+    canvas.changeStrokeColor(color);
+}
+
+// change stuff for the hslFill bar
+hslFill.oninput = function(e){
+    color = hslFromDegrees(e.target.value)
+    // change slider thumb background color
+    e.target.style.backgroundColor = color;
+    // change canvas color
+    canvas.changeFillColor(color);
+}
+
+function hslFromDegrees(degrees){
+    return "hsl(" + degrees + ",87%,42%)";
+}
+
+// change the amount of ghosting occuring with the visualizer
+ghostingBar.oninput = function(e){
     canvas.ghosting = e.target.value;
     console.log(e.target.value);
 }
 
+// perform a search with the clyp api
 searchbar.onkeyup = function(e){
     ajax.get("/search/" + e.target.value, null, function(js){
         results.innerHTML = "";
@@ -28,8 +92,13 @@ searchbar.onkeyup = function(e){
 
 // build a UI element from json
 function buildResult(obj){
-    return "<div onclick='changesong(this)' class='result-item' data-url=" + obj["Mp3Url"] + " \
+    return "<div onclick='changesong(this)' class='result-item' data-url=" + mp3Get(obj["Mp3Url"]) + " \
     >" + obj["Title"] + "</div>";
+}
+
+// get around CORS stuff
+function mp3Get(url){
+    return "/song/" + url.split('/').pop();
 }
 
 function changesong(e){
@@ -87,12 +156,12 @@ ajax.get = function (url, data, callback, async) {
 };
 
 
-
-
+// general UI settings
 var uiElSettings = {
     sidebarMaxWidth: "350"
 }
 
+// fires whenever windowresized
 function update(){
     canvasEl.width = window.innerWidth - uiElSettings.sidebarMaxWidth;
     canvasEl.height = window.innerHeight;
@@ -103,3 +172,4 @@ function update(){
 
 window.onresize = update;
 update();
+init();
