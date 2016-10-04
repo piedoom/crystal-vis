@@ -126,6 +126,12 @@ Given more energy, I would write some more impressive visualizations.
 Right now they're a little lacklustre.  I would probably have a background
 canvas layer so two visualizations could be played at once.
 
+Future
+======
+
+I was actually looking for audio visualization stuff earlier and couldn't find anything decent.  I'd like to condense this stuff
+and make it a module of some sort.
+
 Resources
 ======
 
