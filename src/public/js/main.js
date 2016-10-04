@@ -30,7 +30,7 @@ app = {
 // handle UI changes, etc.
 ui = {
     spacingWidth: function(amount){
-        return (canvasEl.width / amount);
+        return (canvas.element.width / amount);
     }
 }
 
@@ -64,12 +64,13 @@ var defaults = {
 // last: stuff to do at the end of the frame
 var vis = [
     {
+        // the name referenced in our UI
         name: "bars",
         frame: function(ctx){
             
         },
         draw: function(i, data, time, ctx){
-            ctx.fillRect(ui.spacingWidth(data.length) * i, 0, 4, canvasEl.height / 255 * data[i] + 4)
+            ctx.fillRect(ui.spacingWidth(data.length) * i, 0, 4, canvas.element.height / 255 * data[i] + 4)
         },
         last: function(ctx){}
     },
@@ -79,11 +80,9 @@ var vis = [
             ctx.beginPath();
         },
         draw: function(i, data, time, ctx){
-            
-
             // main audio stuff
-            ctx.lineTo(ui.spacingWidth(data.length) * i, canvasEl.height / 2 + (data[i] * (canvasEl.height /512))); 
-            ctx.lineTo(ui.spacingWidth(data.length) * i, canvasEl.height / 2 - (data[i] * (canvasEl.height /512))); 
+            ctx.lineTo(ui.spacingWidth(data.length) * i, canvas.element.height / 2 + (data[i] * (canvas.element.height /512))); 
+            ctx.lineTo(ui.spacingWidth(data.length) * i, canvas.element.height / 2 - (data[i] * (canvas.element.height /512))); 
         },
         last: function(ctx){
             ctx.stroke();
@@ -92,13 +91,13 @@ var vis = [
     {
         name: "leaves",
         frame: function(ctx){
-            ctx.moveTo(0,canvasEl.height / 2);
+            ctx.moveTo(0,canvas.element.height / 2);
             ctx.beginPath();
         },
         draw: function(i, data, time, ctx){
             if (i % 15 === 0 || i === 0){
                 var baseX = ui.spacingWidth(data.length) * i;
-                var baseY = canvasEl.height / 2 + (data[i] * (canvasEl.height /512));
+                var baseY = canvas.element.height / 2 + (data[i] * (canvas.element.height /512));
                 var p = (Math.sin(time / 1000) * 100);
                 for (var n = 0; n < 10; n++){
                     ctx.bezierCurveTo(baseX - 10 + (n * 20) + p,baseY / n - p,baseX - 20,baseY - 20,baseX,baseY + (n * (p / 10)));
@@ -112,13 +111,13 @@ var vis = [
     {
         name: "sailboats",
         frame: function(ctx){
-            ctx.moveTo(0,canvasEl.height / 2);
+            ctx.moveTo(0,canvas.element.height / 2);
             ctx.beginPath();
         },
         draw: function(i, data, time, ctx){
             if (i % 15 === 0 || i === 0){
                 var baseX = ui.spacingWidth(data.length) * i;
-                var baseY = canvasEl.height / 2 + (data[i] * (canvasEl.height /512));
+                var baseY = canvas.element.height / 2 + (data[i] * (canvas.element.height /512));
                 var p = (Math.sin(time / 1000) * 100);
                 for (var n = 0; n < 10; n++){
                     ctx.arc(baseX, baseY, Math.abs(10 + p) + 10, 0, Math.abs(Math.PI - (p / 100) - ((time * i)/1000000)), false);
@@ -137,7 +136,7 @@ var vis = [
         draw: function(i, data, time, ctx){
             if (i % 3 === 0 || i === 0){
                 var baseX = ui.spacingWidth(data.length) * i;
-                var baseY =  (data[i] * (canvasEl.height /512));
+                var baseY =  (data[i] * (canvas.element.height /512));
                 var p = (Math.sin(time / 1000) * 100);
                 for (var n = 0; n < 10; n++){
                     ctx.fillRect(baseX,baseY + (n * 40),10,10)    
@@ -150,6 +149,8 @@ var vis = [
     },
 ]
 
+// array of filters that can be applied
+// app have a name and filter function
 filters = [
     {
         name: "none",
@@ -182,6 +183,7 @@ filters = [
     }
 ]
 
+// main object that controls rendering of the canvas
 canvas = {
     element: document.querySelector("#canvas"),
     ctx: null,
@@ -190,6 +192,8 @@ canvas = {
     filter: 0,
     ghosting: 0.0,
     canvasState: canvasStates.PLAY,
+
+    // initialize some variables
     init: function(){
         this.ctx = this.element.getContext("2d"),
         this.ctx.save();
@@ -251,6 +255,7 @@ canvas = {
         requestAnimationFrame(this.drawFrame.bind(this));
     },
 
+    // draw black on the background
     clearFrame: function(){
         this.ctx.save();
         this.ctx.fillStyle = "rgba(0,0,0," + (1 - this.ghosting) + ")";

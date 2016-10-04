@@ -10,7 +10,6 @@ body {
 #canvas{
     margin: 0;
     padding: 0;
-    background: black;
     position: absolute;
     left: 0;
 }
