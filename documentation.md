@@ -60,6 +60,23 @@ Because of CORs, I have basically set up a proxy to audio files so I can control
 Kemal also uses `ecr`, or embedded crystal like Rails uses `erb`.  The main app is in the views folder.  It's actually just straight up HTML and
 doesn't use any templating.
 
+Building
+======
+
+To build, you'll need a Mac or Linux box and Crystal installed.  Navigate to the root directory, and execute the following.
+
+```
+shards install
+```
+
+This will install dependencies.  To run, execute:
+
+```bash
+crystal src/vis.cr
+```
+
+And then open `localhost:3000`.
+
 Files
 ======
 
